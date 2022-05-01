@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="pragma" content="no-cache">
+		<meta http-equiv="cache-control" content="no-cache">
+		<meta http-equiv="expires" content="0">
+		<meta http-equiv="keywords" content="keyword1,keyword2,keyword3">
+		<meta http-equiv="description" content="This is my page">
+		<title>Telebirrpay Nodejs Demo</title>
+		<script src="./jquery.min.js"></script>
+		<style>
+			div {
+				line-height: 30px;
+				padding: 3px;
+			}
+
+			input {
+				line-height: 25px;
+				outline: none;
+			}
+
+			.label-title {
+				width: 150px;
+				text-align: right;
+				padding-right: 5px;
+			}
+
+			.label-rows {
+				display: flex;
+				line-height: 30px;
+				font-size: 13px;
+			}
+
+			.label-panel {
+				margin: auto;
+				width: 1000px;
+				border: 1px #e5e5e5 solid;
+				font-weight: bold;
+			}
+		</style>
+	</head>
+
+	<body style="text-align: center;">
+		<div class="label-panel">
+			<div>
+				<div>Payment Demo</div>
+			</div>
+			<form action="/submit.php" method="post">
+
+				<div class="label-rows">
+					<div class="label-title">App Id:</div>
+					<div><input id="appid" name="appid" value="ce83aaa3dedd42ab88bd017ce1ca2dd8"></div>
+					<div class="label-title">Timeout Express:</div>
+					<div><input id="timeoutExpress" name="timeoutExpress" value="30"></div>
+					<div class="label-title">Nonce:</div>
+					<div><input id="nonce" name="nonce" value="ffcc1cea6038447c90cba1ff3866728b"></div>
+				</div>
+				<div class="label-rows">
+					<div class="label-title">Out Trade No:</div>
+					<div><input id="outTradeNo" name="outTradeNo" value="2021062421280000011"></div>
+					<div class="label-title">Goods Name:</div>
+					<div><input id="subject" name="subject" value="Goods Name"></div>
+					<div class="label-title">Goods Amount:</div>
+					<div><input id="totalAmount" name="totalAmount" value="10"></div>
+				</div>
+				<div class="label-rows">
+					<div class="label-title">Short Code:</div>
+					<div><input id="shortCode" name="shortCode" value="10011"></div>
+					<div class="label-title">Receive Name:</div>
+					<div><input id="receiveName" name="receiveName" value="Org Name"></div>
+					<div class="label-title">Timestamp:</div>
+					<div><input id="timestamp" name="timestamp" value="" onfocus="clearIntervalInstance()"
+								ondblclick="runIntervalInstance()"></div>
+				</div>
+				<div class="label-rows">
+					<div class="label-title">Notify Url:</div>
+					<div><input id="notifyUrl" name="notifyUrl" value="http://www.google.com/notifyUrl" style="width: 500px;">
+					</div>
+					<div class="label-title">&nbsp;</div>
+					<div style="width: 190px">&nbsp;</div>
+				</div>
+				<div class="label-rows">
+					<div class="label-title">Return Url:</div>
+					<div><input id="returnUrl" name="returnUrl" value="http://www.google.com/returnUrl" style="width: 500px;">
+					</div>
+					<div class="label-title">&nbsp;</div>
+					<div style="width: 190px">&nbsp;</div>
+				</div>
+				<div>
+					<input type="submit" value="Submit"><input type="button" onclick="getData()" value="GetData"
+															   style="margin-left: 30px;">&nbsp;<input type="button"
+																									   onclick="clearData()"
+																									   value="ClearData"
+																									   style="margin-left: 30px;">
+					<script type="text/javascript">
+						if (getQueryString("errmsg") != '' && getQueryString("errmsg") != null) {
+							alert(getQueryString("errmsg"))
+						}
+						var interval;
+						$(function () {
+							runIntervalInstance();
+						});
+
+						function runIntervalInstance() {
+							clearIntervalInstance();
+							interval = setInterval(function () {
+								var timestamp = new Date().getTime();
+								$("#timestamp").val(timestamp);
+								$("#nonce").val(uuid());
+
+								var nowDate = new Date();
+								var year = nowDate.getFullYear();
+								var month = nowDate.getMonth() + 1 < 10 ? "0" + (nowDate.getMonth() + 1)
+									: nowDate.getMonth() + 1;
+								var day = nowDate.getDate() < 10 ? "0" + nowDate.getDate() : nowDate
+									.getDate();
+								var dateStr = year + "" + month + "" + day;
+
+								$("#outTradeNo").val(dateStr + timestamp);
+							}, 1000);
+						}
+
+						function clearIntervalInstance() {
+							clearInterval(interval);
+						}
+
+						function getData() {
+							var outTradeNo = $('#outTradeNo').val();
+							var subject = $('#subject').val();
+							var totalAmount = $('#totalAmount').val();
+							var shortCode = $('#shortCode').val();
+							var notifyUrl = $('#notifyUrl').val();
+							var returnUrl = $('#returnUrl').val();
+							var receiveName = $('#receiveName').val();
+							var appid = $('#appid').val();
+							var timeoutExpress = $('#timeoutExpress').val();
+							var nonce = $('#nonce').val();
+							var timestamp = $('#timestamp').val();
+							$.post("/getData.php", {
+								outTradeNo: outTradeNo,
+								subject: subject,
+								totalAmount: totalAmount,
+								shortCode: shortCode,
+								notifyUrl: notifyUrl,
+								returnUrl: returnUrl,
+								receiveName: receiveName,
+								appid: appid,
+								timeoutExpress: timeoutExpress,
+								nonce: nonce,
+								timestamp: timestamp
+							}, function (res) {
+								$("#sgin").val(res.sign);
+								$("#ussd").val(res.ussd);
+								$("#encode").val(res.encode);
+							});
+						}
+
+						function clearData() {
+							$("#sgin").val("");
+							$("#ussd").val("");
+							$("#encode").val("");
+						}
+
+						function uuid() {
+							var s = [];
+							var hexDigits = "0123456789abcdef";
+							for (var i = 0; i < 36; i++) {
+								s[i] = hexDigits.substr(Math.floor(Math.random() * 0x10), 1);
+							}
+							s[14] = "4"; // bits 12-15 of the time_hi_and_version field to 0010
+							s[19] = hexDigits.substr((s[19] & 0x3) | 0x8, 1); // bits 6-7 of the clock_seq_hi_and_reserved to 01
+							s[8] = s[13] = s[18] = s[23] = "-";
+
+							var uuid = s.join("");
+							return uuid.replace("-", "").replace("-", "").replace("-", "").replace("-", "");
+						}
+
+						function getQueryString(name) {
+							var reg = new RegExp('(^|&)' + name + '=([^&]*)(&|$)', 'i');
+							var r = window.location.search.substr(1).match(reg);
+							if (r != null) {
+								return unescape(r[2]);
+							}
+							return null;
+						}
+					</script>
+				</div>
+			</form>
+		</div>
+
+		<div class="label-panel" style="border-top: 0px;">
+			<div class="label-rows">
+				<div class="label-title" style="width: 70px;">stringA:</div>
+				<div><textarea id="sgin" rows="4" cols="125"></textarea></div>
+			</div>
+			<div class="label-rows">
+				<div class="label-title" style="width: 70px;">ussdjson:</div>
+				<div><textarea id="ussd" rows="4" cols="125"></textarea></div>
+			</div>
+			<div class="label-rows">
+				<div class="label-title" style="width: 70px;">postman:</div>
+				<div><textarea id="encode" rows="11" cols="125"></textarea></div>
+			</div>
+		</div>
+	</body>
+</html>
